@@ -1,0 +1,44 @@
+<ScreenSwitchButton>:
+
+    on_press: self.view.manager.current = self.sub_screen
+
+<TileScreen>:
+
+    up: up_button
+    box: tile_box
+
+    BoxLayout:
+
+        orientation: "vertical"
+
+        ScreenSwitchButton:
+            id: up_button
+            size_hint: (1, .1)
+
+        BoxLayout:
+            id: tile_box
+
+<InfoScreen>:
+
+    up: up_button
+    name_value: name_value
+
+    BoxLayout:
+
+        orientation: "vertical"
+
+        ScreenSwitchButton:
+            id: up_button
+            size_hint: (1, .1)
+
+        Label:
+            id: name_value
+
+
+<DisplayPortal>:
+
+    screenHandler: main_screen
+    
+    ScreenManager:
+        id: main_screen
+        name: "H2H"
