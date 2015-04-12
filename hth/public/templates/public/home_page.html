@@ -39,13 +39,12 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown" dropdown on-toggle="toggled(open)">
                       <a href class="dropdown-toggle" dropdown-toggle>
-                           <span class="flag-icon flag-icon-gb"></span>/
-                           <span class="flag-icon flag-icon-ie"></span>
+                           <span class="flag-icon flag-icon-gb"></span>
                            <span class="caret"></span>
                       </a>
                       <ul class="dropdown-menu list-inline">
-                           <li ng-repeat="choice in languages">
-                               <a ng-click="selectedLanguage = choice"><span class="flag-icon flag-icon-{$ choice $}"</span></a>
+                           <li ng-repeat="(key, choice) in languages">
+                               <a ng-click="setLanguage(key);"><span class="flag-icon {$ choice $}"</span></a>
                            </li>
                       </ul>
                     </li>
@@ -53,25 +52,12 @@
             </div>
         </nav>
 
-
-        <div id="categories" class="container-fluid whole-screen-container" ng-hide="entries">
+        <div id="categories" class="container whole-screen-container" ng-show="categories" ng-hide="entries">
             <div class="row">
-                <div class="col-md-4 tile" style="background-image: url(http://wintershelter.org.uk/wp-content/uploads/2012/08/homeless-shelter.jpg)" ng-click="showEntries('shelter');">
+                <div class="col-md-4 tile" style="background-image: url({$ category.background_image $})" ng-click="showEntries(category.name);" ng-repeat="category in categories">
                     <p>
-                        <i class="fa fa-bed fa-6"></i>
-                        <span class="abstract">Where to find a bed</span>
-                    <p>
-                </div>
-                <div class="col-md-4 tile" style="background-image: url(http://www.pjohare.com/wp-content/uploads/2014/04/Ulster-Fry1.jpg)">
-                    <p>
-                        <i class="fa fa-cutlery fa-6"></i>
-                        <span class="abstract">Where to find food</span>
-                    <p>
-                </div>
-                <div class="col-md-4 tile" style="background-image: url(http://www.samaritans.org/sites/default/files/branch/samaritans-9361.jpg)">
-                    <p>
-                        <i class="fa fa-plus fa-6"></i>
-                        <span class="abstract">Where to find help</span>
+                        <i class="fa {$ category.fa_class $} fa-6"></i>
+                        <p class="abstract" ng-bind="category.abstract[selectedLanguage]"</p>
                     <p>
                 </div>
             </div>
@@ -115,6 +101,26 @@
                 $scope.entries = null;
                 $scope.entry = null;
                 $scope.phone_status = "Offline"
+                $scope.languages = null;
+                
+                $scope.showCategories = function() {
+                    TileService.getCategories().then(
+                            function(data) {
+                                $scope.categories = data;
+                                if ($scope.languages == null) {
+                                    $scope.languages = {};
+                                    for(var i = 0; i < $scope.categories.length; i++) {
+                                        for(var k in $scope.categories[i].abstract) {
+                                            $scope.languages[k] = "flag-icon-" + k;
+                                        }
+                                    }
+                                }
+                            });
+                }
+
+                $scope.setLanguage = function(language) {
+                    $scope.selectedLanguage = language;
+                }
 
                 $scope.showEntries = function(entry_category) {
                     TileService.getEntries(entry_category).then(
@@ -134,15 +140,7 @@
                     connection.sendDigits("");
                 };
 
-                $scope.languages = [
-                        'gb',
-                        'pl',
-                        'ro',
-                        'bg'
-                         ];
-
                 $scope.selectedLanguage = 'gb';
-
                 $scope.languageStatus = {
                         isopen: false
                 };
@@ -158,25 +156,35 @@
                 Twilio.Device.error(function (error) { console.log(error); $scope.phone_status = "There has been an error"; });
                 Twilio.Device.connect(function (conn) { $scope.phone_status = "Successfully established call"; });
                 Twilio.Device.disconnect(function (conn) { $scope.phone_status = "Call ended"; });
+                $scope.showCategories();
             });
 
             hthApp.service('TileService', function( $http, $q ) {
                 // Return public API.
                 return({
-                    getEntries: getEntries
+                    getEntries: getEntries,
+                    getCategories: getCategories
                 });
 
                 function getEntries(entry_type) {
                     var request = $http({
                        method: "get",
-                        url: "/api",
+                        url: "/api/entries",
                         params: {
-                            entry_type: entry_type
+                            category: entry_type
                         },
                     });
  
                     return( request.then( handleSuccess, alert ) );
+                }
+
+                function getCategories(entry_type) {
+                    var request = $http({
+                       method: "get",
+                        url: "/api/categories",
+                    });
  
+                    return( request.then( handleSuccess, alert ) );
                 }
 
                 function handleSuccess( response ) {

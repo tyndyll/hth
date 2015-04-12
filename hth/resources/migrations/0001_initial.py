@@ -11,34 +11,73 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='Category',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=255)),
+                ('abstract', models.CharField(max_length=100)),
+                ('fa_class', models.CharField(max_length=20)),
+                ('background_image', models.CharField(max_length=255)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='CategoryAbstractLanguage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('language', models.CharField(max_length=2)),
+                ('abstract', models.CharField(max_length=100)),
+                ('category', models.ForeignKey(to='resources.Category')),
+            ],
+        ),
+        migrations.CreateModel(
             name='Entry',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('title', models.CharField(max_length=15)),
-                ('fa_class', models.CharField(max_length=30)),
-                ('background_image', models.FileField(upload_to=b'')),
                 ('abstract', models.CharField(max_length=100)),
                 ('description', models.TextField()),
-                ('entry_type', models.CharField(max_length=1, choices=[(b'T', b'Tile'), (b'D', b'Detail')])),
+                ('address', models.TextField()),
+                ('opening', models.TextField()),
+                ('category', models.ForeignKey(to='resources.Category')),
             ],
         ),
         migrations.CreateModel(
-            name='EntrySet',
+            name='EntryAbstractLanguage',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=255)),
+                ('language', models.CharField(max_length=2)),
+                ('abstract', models.CharField(max_length=100)),
+                ('entry', models.ForeignKey(to='resources.Entry')),
             ],
         ),
         migrations.CreateModel(
-            name='EntrySetRelationship',
+            name='EntryDescriptionLanguage',
             fields=[
-                ('parent', models.OneToOneField(primary_key=True, serialize=False, to='resources.EntrySet')),
-                ('sub_set', models.ForeignKey(related_name='+', to='resources.EntrySet')),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('language', models.CharField(max_length=2)),
+                ('description', models.TextField()),
+                ('entry', models.ForeignKey(to='resources.Entry')),
             ],
         ),
-        migrations.AddField(
-            model_name='entry',
-            name='entry_set',
-            field=models.ForeignKey(to='resources.EntrySet'),
+        migrations.CreateModel(
+            name='EntryPhone',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('number', models.CharField(max_length=12)),
+                ('available', models.BooleanField()),
+                ('entry', models.ForeignKey(to='resources.Entry')),
+            ],
+        ),
+        migrations.AlterUniqueTogether(
+            name='entrydescriptionlanguage',
+            unique_together=set([('entry', 'language')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='entryabstractlanguage',
+            unique_together=set([('entry', 'language')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='categoryabstractlanguage',
+            unique_together=set([('category', 'language')]),
         ),
     ]
