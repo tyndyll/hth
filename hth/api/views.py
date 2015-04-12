@@ -20,12 +20,13 @@ def get_entries(request):
                     },
                 "address": entry.address,
                 "opening": entry.opening,
-                "phone": []
+                "phone": [],
+                "image": entry.image
             }
         for language in EntryAbstractLanguage.objects.filter(entry=entry):
             obj["abstract"][language.language] = language.abstract
         for language in EntryDescriptionLanguage.objects.filter(entry=entry):
-            obj["description"][language.language] = language.description
+            obj["description"][language.language] = language.description.replace("\r\n", "<br />")
         for phone in EntryPhone.objects.filter(entry=entry):
             obj["phone"].append({
                     "number": phone.number,

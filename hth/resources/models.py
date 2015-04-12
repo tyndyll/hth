@@ -28,6 +28,7 @@ class Entry(models.Model):
     category = models.ForeignKey('Category')
     address = models.TextField()
     opening = models.TextField()
+    image = models.CharField(max_length=100)
 
     def __unicode__(self):
         return unicode("[{}] {}".format(self.category.name, self.title))
@@ -59,3 +60,6 @@ class EntryPhone(models.Model):
     entry = models.ForeignKey('Entry')
     number = models.CharField(max_length=12)
     available = models.BooleanField()
+
+    def __unicode__(self):
+        return unicode(self.entry.title)
