@@ -22,6 +22,10 @@
                 background-color: rgba(255,255,255,0.5);
             }
 
+            p.uppercase {
+                text-transform: uppercase;
+            }
+
         </style>
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
@@ -70,23 +74,47 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-6 col-md-3" ng-repeat="entry in entries" ng-click="showEntry(entry)">
+                <div class="col-sm-6 col-md-3" ng-repeat="entry in entries" ng-click="showEntry(entry);">
                     <div class="thumbnail text-center">
                         <img src="https://pbs.twimg.com/profile_images/3367760412/e2d4ffa54c27b27d48488fc209313144_400x400.jpeg" alt="...">
                         <div class="caption">
-                        <h3>{$ entry.title $}</h3>
-                        <p>{$ entry.abstract[selectedLanguage] $}</p>
+                            <h3>{$ entry.title $}</h3>
+                            <p>{$ entry.abstract[selectedLanguage] $}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="entry" class="container-fluid" ng-show="entry">
+        <div id="entry" class="container" ng-show="entry">
             <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-4 text-center">Name: {$ entry.title $}</div>
-                <h1 id="status" ng-bind="phone_status"></h1>
-                <button ng-click="toggleCall();">Call</button>
+                <div class="text-center">
+                    <button type="button" class="btn btn-success text-center" ng-click="entry=null;"><i class="fa fa-arrow-up fa-2x"></i></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="thumbnail text-center">
+                        <img src="https://pbs.twimg.com/profile_images/3367760412/e2d4ffa54c27b27d48488fc209313144_400x400.jpeg" alt="...">
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h3>{$ entry.title $}</h3>
+                    <address>{$ entry.address $}</address>
+                    <hr />
+                    <address ng-repeat="phone in entry.phone">
+                        <abbr title="Phone">P:</abbr> {$ phone.number $} 
+                        <button class="btn" ng-class="phone_btn_status" ng-click="toggleCall(phone.number);">
+                            <i class="fa {$ phone_status $}"></i>
+                        </button>
+                        <button ng-show="phone_status_text.length > 0" class="btn {$ phone_btn_status $}" ng-bind="phone_status_text"></button>
+                    </address>
+                </div>
+                <div class="col-md-4">
+                    <p class="uppercase">{$ entry.abstract[selectedLanguage] $}</p>
+                    <p><i>{$entry.description[selectedLanguage] $}</i><p>
+                    <p>{$entry.opening $}<p>
+                </div>
             </div>
         </div>
 
@@ -110,7 +138,9 @@
             hthApp.controller('TileController', function($scope, TileService) {
                 $scope.entries = null;
                 $scope.entry = null;
-                $scope.phone_status = "Offline"
+                $scope.phone_status = "fa-circle";
+                $scope.phone_btn_status = "btn-primary";
+                $scope.phone_status_text = ""
                 $scope.languages = null;
                 
                 $scope.showCategories = function() {
@@ -145,9 +175,9 @@
                 }
 
                 $scope.toggleCall = function() {
-                    params = { "tocall" : ""};
+                    params = { "tocall" : "447793274894"};
                     connection = Twilio.Device.connect(params);
-                    connection.sendDigits("");
+                    connection.sendDigits("447793274894");
                 };
 
                 $scope.selectedLanguage = 'gb';
@@ -161,11 +191,32 @@
                             $scope.languageStatus.isopen = !$scope.languageStatus.isopen;
                 };
 
-                Twilio.Device.ready(function (device) { $scope.phone_status = "Ready to start call"; });
-                Twilio.Device.offline(function (device) { $scope.phone_status = "Offline"; });
-                Twilio.Device.error(function (error) { console.log(error); $scope.phone_status = "There has been an error"; });
-                Twilio.Device.connect(function (conn) { $scope.phone_status = "Successfully established call"; });
-                Twilio.Device.disconnect(function (conn) { $scope.phone_status = "Call ended"; });
+                Twilio.Device.ready(function (device) { 
+                    $scope.phone_status_text = ""; 
+                    $scope.phone_btn_status = "btn-primary"; 
+                    $scope.phone_status = "fa-phone";
+                });
+                Twilio.Device.offline(function (device) { 
+                    $scope.phone_status_text = "Dialing is unavailable"; 
+                    $scope.phone_btn_status = "btn-danger"; 
+                    $scope.phone_status = 'times-circle';
+                });
+                Twilio.Device.error(function (error) { 
+                    console.log(error); 
+                    $scope.phone_status_text = "There has been an error"; 
+                    $scope.phone_btn_status = "btn-warning"; 
+                    $scope.phone_status = 'fa-phone-square';
+                });
+                Twilio.Device.connect(function (conn) { 
+                    $scope.phone_status_text = "Successfully established call"; 
+                    $scope.phone_btn_status = "btn-success"; 
+                    $scope.phone_status = 'fa-microphone';
+                });
+                Twilio.Device.disconnect(function (conn) { 
+                    $scope.phone_status_text = "Call ended"; 
+                    $scope.phone_btn_status = "btn-primary"; 
+                    $scope.phone_status = 'fa-microphone-slash';
+                });
                 $scope.showCategories();
             });
 
