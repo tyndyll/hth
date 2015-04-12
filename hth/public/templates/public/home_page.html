@@ -74,7 +74,7 @@
                     <div class="thumbnail text-center">
                         <img src="https://pbs.twimg.com/profile_images/3367760412/e2d4ffa54c27b27d48488fc209313144_400x400.jpeg" alt="...">
                         <div class="caption">
-                        <h3>{$ entry.fields.title $}</h3>
+                        <h3>{$ entry.title $}</h3>
                         <p>{$ entry.abstract[selectedLanguage] $}</p>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
         <div id="entry" class="container-fluid" ng-show="entry">
             <div class="row">
                 <div class="col-md-4"></div>
-                <div class="col-md-4 text-center">Name: {$ entry.fields.title $}</div>
+                <div class="col-md-4 text-center">Name: {$ entry.title $}</div>
                 <h1 id="status" ng-bind="phone_status"></h1>
                 <button ng-click="toggleCall();">Call</button>
             </div>
